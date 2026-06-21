@@ -1,0 +1,59 @@
+name: openttd-telemetry
+
+# Data plane for the OpenTTD -> QuestDB telemetry demo.
+#
+#   questdb  - time-series database (web console + ILP ingest + pg-wire for Grafana)
+#   grafana  - dashboards (anonymous admin, auto-provisioned datasource + dashboard)
+#   bridge   - Rust "proxy" that reads OpenTTD's admin port and writes ILP to QuestDB
+#
+# OpenTTD itself runs on the HOST (your downloaded game binary). The bridge
+# container reaches the host's admin port via host.docker.internal.
+
+services:
+  questdb:
+    image: questdb/questdb:9.4.3
+    container_name: openttd_questdb
+    restart: unless-stopped
+    ports:
+      - "9000:9000"   # HTTP: web console + ILP-over-HTTP ingestion
+      - "8812:8812"   # PostgreSQL wire protocol (Grafana datasource)
+      - "9009:9009"   # ILP-over-TCP (unused by default, exposed for convenience)
+    volumes:
+      - questdb_data:/var/lib/questdb
+
+  grafana:
+    image: grafana/grafana:11.6.15
+    container_name: openttd_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # No login wall - land straight on the dashboard. Demo-only, do not ship.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_USERS_DEFAULT_THEME: "dark"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - questdb
+
+  bridge:
+    build: ./bridge
+    image: openttd-questdb-bridge:latest
+    container_name: openttd_bridge
+    restart: unless-stopped
+    environment:
+      ADMIN_HOST: host.docker.internal      # the OpenTTD server on your host
+      ADMIN_PORT: "3977"
+      ADMIN_PASSWORD: questdb
+      QUESTDB_CONF: "http::addr=questdb:9000;"
+      TABLE: vehicle_telemetry
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - questdb
+
+volumes:
+  questdb_data:

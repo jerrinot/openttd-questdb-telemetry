@@ -1,0 +1,22 @@
+apiVersion: 1
+
+# QuestDB speaks the PostgreSQL wire protocol on port 8812, so Grafana talks to
+# it through the built-in PostgreSQL datasource. Default QuestDB credentials are
+# admin / quest, database "qdb".
+datasources:
+  - name: QuestDB
+    uid: questdb
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: questdb:8812
+    user: admin
+    isDefault: true
+    editable: true
+    jsonData:
+      database: qdb
+      sslmode: disable
+      postgresVersion: 1500
+      timescaledb: false
+      maxOpenConns: 5
+    secureJsonData:
+      password: quest

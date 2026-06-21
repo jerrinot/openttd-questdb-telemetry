@@ -1,0 +1,13 @@
+/bridge/target
+*.sav
+*.log
+*.png
+.playwright-mcp/
+.DS_Store
+
+# Launching OpenTTD with `-c config/play.cfg` makes it drop its own runtime files
+# into config/ (secrets.cfg with passwords, private.cfg, GUI state, downloaded
+# AI content). Keep only the two project configs.
+config/*
+!config/demo.cfg
+!config/play.cfg

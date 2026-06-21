@@ -1,0 +1,19 @@
+[package]
+name = "openttd-questdb-bridge"
+version = "0.1.0"
+edition = "2021"
+description = "Relays OpenTTD GameScript vehicle telemetry from the admin port into QuestDB"
+license = "MIT"
+
+[[bin]]
+name = "bridge"
+path = "src/main.rs"
+
+[dependencies]
+# Official QuestDB ingestion client (InfluxDB Line Protocol over HTTP).
+# Default features = sync TCP+HTTP senders + webpki roots + ring crypto.
+questdb-rs = "6.1"
+serde_json = "1"
+
+[profile.release]
+opt-level = 2

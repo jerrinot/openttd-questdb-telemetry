@@ -11,3 +11,4 @@
 config/*
 !config/demo.cfg
 !config/play.cfg
+!config/observe.cfg

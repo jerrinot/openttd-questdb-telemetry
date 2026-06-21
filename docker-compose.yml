@@ -18,8 +18,15 @@ services:
       - "9000:9000"   # HTTP: web console + ILP-over-HTTP ingestion
       - "8812:8812"   # PostgreSQL wire protocol (Grafana datasource)
       - "9009:9009"   # ILP-over-TCP (unused by default, exposed for convenience)
+    environment:
+      # Serve our custom web console (the feat/notebooks build with Notebooks /
+      # advanced dashboards) instead of the bundled one. QuestDB serves from this
+      # dir while still extracting its own console to <root>/public (unused), so
+      # nothing clobbers ours — no QuestDB rebuild needed.
+      QDB_HTTP_STATIC_PUBLIC_DIRECTORY: /console
     volumes:
       - questdb_data:/var/lib/questdb
+      - ./questdb/console:/console:ro
 
   grafana:
     image: grafana/grafana:11.6.15

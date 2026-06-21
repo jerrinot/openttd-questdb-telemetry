@@ -1,0 +1,313 @@
+{
+  "formatName": "dexie",
+  "formatVersion": 1,
+  "data": {
+    "databaseName": "web-console",
+    "databaseVersion": 9,
+    "tables": [
+      {
+        "name": "buffers",
+        "schema": "++id,label,position,archived,archivedAt",
+        "rowCount": 1
+      }
+    ],
+    "data": [
+      {
+        "tableName": "buffers",
+        "inbound": true,
+        "rows": [
+          {
+            "id": 990001,
+            "label": "OpenTTD Telemetry",
+            "value": "",
+            "position": 100,
+            "notebookViewState": {
+              "cells": [
+                {
+                  "id": "ottd-title",
+                  "type": "markdown",
+                  "value": "# OpenTTD \u00b7 Live Telemetry\nLive vehicle & company telemetry from a running OpenTTD game. Charts auto-refresh every few seconds.",
+                  "topHeight": 60,
+                  "position": 0
+                },
+                {
+                  "id": "ottd-speed",
+                  "value": "SELECT timestamp AS time, round(avg(speed),1) AS avg_kmh, round(max(speed),1) AS max_kmh FROM vehicle_telemetry WHERE timestamp > dateadd('m', -15, now()) SAMPLE BY 1s",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Fleet speed (avg & max km/h)",
+                    "xColumn": "time",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "line",
+                        "yColumns": [
+                          "avg_kmh",
+                          "max_kmh"
+                        ],
+                        "enabled": true,
+                        "name": "Fleet speed (avg & max km/h)"
+                      }
+                    ]
+                  },
+                  "position": 1
+                },
+                {
+                  "id": "ottd-map",
+                  "value": "SELECT x, y FROM vehicle_telemetry WHERE timestamp > dateadd('s', -60, now()) LATEST ON timestamp PARTITION BY vid",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Live vehicle positions",
+                    "xColumn": "x",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "scatter",
+                        "yColumns": [
+                          "y"
+                        ],
+                        "enabled": true,
+                        "name": "Live vehicle positions"
+                      }
+                    ]
+                  },
+                  "position": 2
+                },
+                {
+                  "id": "ottd-bytype",
+                  "value": "SELECT timestamp AS time, vtype, count_distinct(vid) AS vehicles FROM vehicle_telemetry WHERE timestamp > dateadd('m', -15, now()) SAMPLE BY 2s",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Active vehicles by type",
+                    "xColumn": "time",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "line",
+                        "yColumns": [
+                          "vehicles"
+                        ],
+                        "enabled": true,
+                        "name": "Active vehicles by type",
+                        "partitionByColumn": "vtype"
+                      }
+                    ]
+                  },
+                  "position": 3
+                },
+                {
+                  "id": "ottd-load",
+                  "value": "SELECT timestamp AS time, round(avg(load_pct),1) AS load_pct FROM vehicle_telemetry WHERE timestamp > dateadd('m', -15, now()) SAMPLE BY 2s",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Avg load factor (%)",
+                    "xColumn": "time",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "area",
+                        "yColumns": [
+                          "load_pct"
+                        ],
+                        "enabled": true,
+                        "name": "Avg load factor (%)"
+                      }
+                    ]
+                  },
+                  "position": 4
+                },
+                {
+                  "id": "ottd-value",
+                  "value": "SELECT timestamp AS time, company, last(company_value) AS value FROM company_economy WHERE timestamp > dateadd('m', -15, now()) SAMPLE BY 5s",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Company value over time",
+                    "xColumn": "time",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "line",
+                        "yColumns": [
+                          "value"
+                        ],
+                        "enabled": true,
+                        "name": "Company value over time",
+                        "partitionByColumn": "company"
+                      }
+                    ]
+                  },
+                  "position": 5
+                },
+                {
+                  "id": "ottd-cash",
+                  "value": "SELECT timestamp AS time, company, last(money) AS cash FROM company_economy WHERE timestamp > dateadd('m', -15, now()) SAMPLE BY 2s",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Bank balance over time",
+                    "xColumn": "time",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "line",
+                        "yColumns": [
+                          "cash"
+                        ],
+                        "enabled": true,
+                        "name": "Bank balance over time",
+                        "partitionByColumn": "company"
+                      }
+                    ]
+                  },
+                  "position": 6
+                },
+                {
+                  "id": "ottd-profit",
+                  "value": "SELECT company, profit_q FROM company_economy LATEST ON timestamp PARTITION BY company ORDER BY profit_q DESC",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Quarterly profit by company",
+                    "xColumn": "company",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "bar",
+                        "yColumns": [
+                          "profit_q"
+                        ],
+                        "enabled": true,
+                        "name": "Quarterly profit by company"
+                      }
+                    ]
+                  },
+                  "position": 7
+                },
+                {
+                  "id": "ottd-mix",
+                  "value": "SELECT vtype, count_distinct(vid) AS vehicles FROM vehicle_telemetry WHERE timestamp > dateadd('s', -60, now()) GROUP BY vtype ORDER BY vehicles DESC",
+                  "type": "sql",
+                  "mode": "draw",
+                  "autoRefresh": true,
+                  "topHeight": 64,
+                  "bottomHeight": 320,
+                  "chartConfig": {
+                    "name": "Vehicle mix by type",
+                    "xColumn": "vtype",
+                    "autoRefresh": true,
+                    "queries": [
+                      {
+                        "type": "pie",
+                        "yColumns": [
+                          "vehicles"
+                        ],
+                        "enabled": true,
+                        "name": "Vehicle mix by type"
+                      }
+                    ]
+                  },
+                  "position": 8
+                }
+              ],
+              "settings": {
+                "layoutMode": "grid",
+                "layout": [
+                  {
+                    "i": "ottd-title",
+                    "x": 0,
+                    "y": 0,
+                    "w": 12,
+                    "h": 4
+                  },
+                  {
+                    "i": "ottd-speed",
+                    "x": 0,
+                    "y": 4,
+                    "w": 6,
+                    "h": 32
+                  },
+                  {
+                    "i": "ottd-map",
+                    "x": 6,
+                    "y": 4,
+                    "w": 6,
+                    "h": 32
+                  },
+                  {
+                    "i": "ottd-bytype",
+                    "x": 0,
+                    "y": 36,
+                    "w": 6,
+                    "h": 32
+                  },
+                  {
+                    "i": "ottd-load",
+                    "x": 6,
+                    "y": 36,
+                    "w": 6,
+                    "h": 32
+                  },
+                  {
+                    "i": "ottd-value",
+                    "x": 0,
+                    "y": 68,
+                    "w": 6,
+                    "h": 32
+                  },
+                  {
+                    "i": "ottd-cash",
+                    "x": 6,
+                    "y": 68,
+                    "w": 6,
+                    "h": 32
+                  },
+                  {
+                    "i": "ottd-profit",
+                    "x": 0,
+                    "y": 100,
+                    "w": 6,
+                    "h": 32
+                  },
+                  {
+                    "i": "ottd-mix",
+                    "x": 6,
+                    "y": 100,
+                    "w": 6,
+                    "h": 32
+                  }
+                ],
+                "variables": []
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
